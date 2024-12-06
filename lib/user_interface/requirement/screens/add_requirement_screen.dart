@@ -235,7 +235,6 @@ class _TransmissionSelectorState extends State<TransmissionSelector> {
               ),
             ],
           ),
-          // ... Rest of your code for the "Fuel" section
         ],
       ),
     );
