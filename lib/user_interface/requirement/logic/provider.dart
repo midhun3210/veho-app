@@ -2,6 +2,8 @@ import 'package:flutter/material.dart';
 import 'package:veho_app/user_interface/requirement/models/add_requirement_model.dart';
 import 'package:veho_app/user_interface/requirement/models/brand_model.dart';
 import 'package:veho_app/user_interface/requirement/models/model.dart';
+import 'package:veho_app/user_interface/requirement/models/model_model.dart';
+import 'package:veho_app/user_interface/requirement/models/variant_model.dart';
 import 'package:veho_app/user_interface/requirement/service/service.dart';
 
 class RequirementProvider extends ChangeNotifier {
@@ -27,6 +29,7 @@ class RequirementProvider extends ChangeNotifier {
   }
 
   Future<void> AddRequirement() async {
+    brandModel = null;
     await RequirementSerivces().addRequirement(_addRequirementModel.toJson());
   }
 
@@ -39,8 +42,39 @@ class RequirementProvider extends ChangeNotifier {
   }
 
   Future<void> getBrandData() async {
-    brandModel = BrandModel();
+    brandModel = null;
     brandModel = await RequirementSerivces()
         .getBrandData(addRequirementModel.vehicleTypeId ?? 1);
+  }
+
+  ModelModel? _modelModel;
+  ModelModel? get modelModel => _modelModel;
+
+  set modelModel(ModelModel? v) {
+    _modelModel = v;
+    notifyListeners();
+  }
+
+  Future<void> getModelData() async {
+    modelModel = null;
+    modelModel = await RequirementSerivces().getModelData(
+        addRequirementModel.vehicleTypeId!, addRequirementModel.brandId!);
+    print(modelModel.toString() + "vhgvhjg");
+  }
+
+  VariantModel? _variantModel;
+  VariantModel? get variantModel => _variantModel;
+
+  set variantModel(VariantModel? v) {
+    _variantModel = v;
+    notifyListeners();
+  }
+
+  Future<void> getVariantData() async {
+    variantModel = null;
+    variantModel = await RequirementSerivces().getVariantData(
+        addRequirementModel.vehicleTypeId!,
+        addRequirementModel.brandId!,
+        addRequirementModel.vehicleModelId!);
   }
 }

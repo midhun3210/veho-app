@@ -1,11 +1,11 @@
 import 'package:veho_app/user_interface/home/model/total_model.dart';
 import 'package:veho_app/utils/core_service/serviced.dart';
 
-class HomeSerivces {
+class HomeSerivces extends VehoServices {
   Future<List<VehicleModel>> getTotalVehicle() async {
     List<VehicleModel> totalVehicle = [];
     try {
-      var response = await VehoServices().get(
+      var response = await get(
         'vendor/get-total-vehicles',
       );
       if (response['data'] != null && response['data'] is List) {

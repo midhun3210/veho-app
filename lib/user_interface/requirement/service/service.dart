@@ -1,12 +1,14 @@
 import 'package:veho_app/user_interface/requirement/models/brand_model.dart';
 import 'package:veho_app/user_interface/requirement/models/model.dart';
+import 'package:veho_app/user_interface/requirement/models/model_model.dart';
+import 'package:veho_app/user_interface/requirement/models/variant_model.dart';
 import 'package:veho_app/utils/core_service/serviced.dart';
 
-class RequirementSerivces {
+class RequirementSerivces extends VehoServices {
   Future<List<RequirementModel>> getVendorRequirements() async {
     List<RequirementModel> requirementModel = [];
     try {
-      var response = await VehoServices().get(
+      var response = await get(
         'get-vendor-requirements',
       );
       if (response['data'] != null && response['data'] is List) {
@@ -24,7 +26,7 @@ class RequirementSerivces {
 
   Future<void> addRequirement(var body) async {
     try {
-      final response = await VehoServices().post(
+      final response = await post(
         'add-requirement',
         body: body,
       );
@@ -43,7 +45,7 @@ class RequirementSerivces {
   Future<BrandModel> getBrandData(int typeId) async {
     BrandModel brandModel = BrandModel();
     try {
-      var response = await VehoServices().get(
+      var response = await get(
         'vendor/get-brand-data/$typeId',
       );
       if (response['data'] != null) {
@@ -55,5 +57,42 @@ class RequirementSerivces {
       // brandModel ;
     }
     return brandModel;
+  }
+
+  Future<ModelModel> getModelData(int typeId, int brandId) async {
+    ModelModel modelModel = ModelModel();
+    try {
+      var response = await get(
+        'vendor/get-model-data/$typeId/$brandId',
+      );
+      print(modelModel.toString() + 'ss');
+      if (response['status']) {
+        modelModel = ModelModel.fromJson(response);
+        print(modelModel.toString() + 'ss');
+      } else {
+        //  brandModel;
+      }
+    } catch (e) {
+      // brandModel ;
+    }
+    return modelModel;
+  }
+
+  Future<VariantModel> getVariantData(
+      int typeId, int brandId, int modelId) async {
+    VariantModel modelModel = VariantModel();
+    try {
+      var response = await get(
+        'vendor/get-variant-data/$typeId/$brandId/$modelId',
+      );
+      if (response['data'] != null) {
+        modelModel = VariantModel.fromJson(response['data']);
+      } else {
+        //  brandModel;
+      }
+    } catch (e) {
+      // brandModel ;
+    }
+    return modelModel;
   }
 }

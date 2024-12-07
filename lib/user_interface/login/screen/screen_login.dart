@@ -142,7 +142,7 @@ class _ScreenLoginState extends State<ScreenLogin> {
                                 _formKey.currentState!.validate()) {
                               _isLoading = true;
                               setState(() {});
-                              await LoginService().login(
+                              await LoginService().loginMethod(
                                   _emailController.text.toString(),
                                   _passwordController.text.toString());
                             }

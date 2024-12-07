@@ -6,7 +6,7 @@ import 'package:fluttertoast/fluttertoast.dart';
 const String baseUrl = "https://test.vehup.com/api/";
 String? token;
 
-class VehoServices {
+abstract class VehoServices {
   /// Generic HTTP GET method
   Future<dynamic> get(String endpoint, {Map<String, String>? headers}) async {
     try {
@@ -34,7 +34,7 @@ class VehoServices {
               'Authorization': 'Bearer $token',
               'Content-Type': 'application/json; charset=UTF-8',
             },
-        body: body,
+        body: jsonEncode(body),
       );
       return _handleResponse(response);
     } catch (e) {

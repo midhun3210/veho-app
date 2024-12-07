@@ -3,6 +3,7 @@ import 'package:provider/provider.dart';
 import 'package:veho_app/user_interface/requirement/logic/provider.dart';
 import 'package:veho_app/utils/widgets/button.dart';
 import 'package:veho_app/utils/widgets/dropdown.dart';
+import 'package:veho_app/utils/widgets/shimmer.dart';
 
 class ScreenAddRequirement extends StatefulWidget {
   const ScreenAddRequirement({super.key});
@@ -12,13 +13,15 @@ class ScreenAddRequirement extends StatefulWidget {
 }
 
 class _ScreenAddRequirementState extends State<ScreenAddRequirement> {
-  ValueNotifier<bool> _brandNotifier = ValueNotifier<bool>(false);
+  final ValueNotifier<bool> _modelNotifier = ValueNotifier<bool>(false);
+  final ValueNotifier<bool> _variantNotifier = ValueNotifier<bool>(false);
   final _formKey = GlobalKey<FormState>();
 
   late final RequirementProvider provider;
   @override
   void initState() {
     provider = context.read<RequirementProvider>();
+    provider.addRequirementModel.transmissionId = 1;
     Future(() => provider.getBrandData());
     // TODO: implement initState
     super.initState();
@@ -55,64 +58,126 @@ class _ScreenAddRequirementState extends State<ScreenAddRequirement> {
                                 ?.map((e) => e.name ?? '')
                                 .toList() ??
                             [],
-                        onChanged: (String? v) {
+                        onChanged: (String? v) async {
                           value.addRequirementModel.brandId = value
                               .brandModel?.brands
                               ?.firstWhere((e) => e.name == v)
                               .id;
+                          _modelNotifier.value = true;
+                          await value.getModelData();
+                          _modelNotifier.value = false;
                         },
                       ),
                       ValueListenableBuilder(
-                          valueListenable: _brandNotifier,
-                          builder: (context, value, child) {
-                            return CustomDropDown(
-                              text: 'Model',
-                              label: 'Select Model',
-                              items: [],
-                              onChanged: (String? value) {},
-                            );
+                          valueListenable: _modelNotifier,
+                          builder: (context, v, child) {
+                            return v
+                                ? const Padding(
+                                    padding: EdgeInsets.all(8.0),
+                                    child: CustomShimmerTextField(
+                                      width: double.maxFinite,
+                                      height: 60,
+                                    ),
+                                  )
+                                : CustomDropDown(
+                                    text: 'Model',
+                                    label: 'Select Model',
+                                    items: value.modelModel?.data
+                                            ?.map((e) => e.name ?? '')
+                                            .toList() ??
+                                        [],
+                                    onChanged: (String? v) async {
+                                      value.addRequirementModel.vehicleModelId =
+                                          value.modelModel?.data
+                                              ?.firstWhere((e) => e.name == v)
+                                              .id;
+                                      _variantNotifier.value = true;
+                                      await value.getVariantData();
+                                      _variantNotifier.value = false;
+                                    },
+                                  );
                           }),
                       ValueListenableBuilder(
-                          valueListenable: _brandNotifier,
-                          builder: (context, value, child) {
-                            return CustomDropDown(
-                              text: 'Variant',
-                              label: 'Select Variant',
-                              items: [],
-                              onChanged: (String? value) {},
-                            );
+                          valueListenable: _variantNotifier,
+                          builder: (context, v, child) {
+                            return v
+                                ? const Padding(
+                                    padding: EdgeInsets.all(8.0),
+                                    child: CustomShimmerTextField(
+                                      width: double.maxFinite,
+                                      height: 60,
+                                    ),
+                                  )
+                                : CustomDropDown(
+                                    text: 'Variant',
+                                    label: 'Select Variant',
+                                    items: value.variantModel?.bodyTypes
+                                            ?.map((e) => e.name ?? '')
+                                            .toList() ??
+                                        [],
+                                    onChanged: (String? v) {
+                                      value.addRequirementModel
+                                              .vehicleVariantId =
+                                          value.variantModel?.bodyTypes
+                                              ?.firstWhere((e) => e.name == v)
+                                              .id;
+                                    },
+                                  );
                           }),
                       ValueListenableBuilder(
-                          valueListenable: _brandNotifier,
-                          builder: (context, value, child) {
+                          valueListenable: _modelNotifier,
+                          builder: (context, v, child) {
                             return CustomDropDown(
                               text: 'Year',
                               label: 'Select Year',
-                              items: [],
-                              onChanged: (String? value) {},
+                              items: years,
+                              onChanged: (String? v) {
+                                value.addRequirementModel.year =
+                                    int.tryParse(v ?? '');
+                              },
                             );
                           }),
                       TransmissionSelector(),
                       ValueListenableBuilder(
-                          valueListenable: _brandNotifier,
-                          builder: (context, value, child) {
-                            return CustomDropDown(
-                              text: 'Fuel ',
-                              label: 'Select fuel type',
-                              items: [],
-                              onChanged: (String? value) {},
-                            );
+                          valueListenable: _variantNotifier,
+                          builder: (context, v, child) {
+                            return v
+                                ? const Padding(
+                                    padding: EdgeInsets.all(8.0),
+                                    child: CustomShimmerTextField(
+                                      width: double.maxFinite,
+                                      height: 60,
+                                    ),
+                                  )
+                                : CustomDropDown(
+                                    text: 'Fuel ',
+                                    label: 'Select fuel type',
+                                    items: value.variantModel?.fuelTypes
+                                            ?.map((e) => e.name ?? '')
+                                            .toList() ??
+                                        [],
+                                    onChanged: (String? v) {
+                                      value.addRequirementModel.fuelTypeId =
+                                          value.variantModel?.fuelTypes
+                                              ?.firstWhere((e) => e.name == v)
+                                              .id;
+                                    },
+                                  );
                           }),
-                      ValueListenableBuilder(
-                          valueListenable: _brandNotifier,
-                          builder: (context, value, child) {
-                            return CustomDropDown(
-                              text: 'Color',
-                              label: 'Select Color',
-                              items: [],
-                              onChanged: (String? value) {},
-                            );
-                          }),
+                      CustomDropDown(
+                        text: 'Color',
+                        label: 'Select Color',
+                        items: value.brandModel?.vehicleColors
+                                ?.map((e) => e.name ?? '')
+                                .toList() ??
+                            [],
+                        onChanged: (String? v) {
+                          value.addRequirementModel.vehicleColorId = value
+                              .brandModel?.vehicleColors
+                              ?.firstWhere((e) => e.name == v)
+                              .id;
+                        },
+                      ),
                       const SizedBox(
                         height: 50,
                       )
@@ -127,9 +192,15 @@ class _ScreenAddRequirementState extends State<ScreenAddRequirement> {
         child: CustomButton(
           backgroundColor: const Color(0xff4A101D),
           buttonText: 'Submit',
-          onPressed: () {
+          onPressed: () async {
             if (_formKey.currentState != null &&
-                _formKey.currentState!.validate()) {}
+                _formKey.currentState!.validate()) {
+              await provider.AddRequirement();
+              provider.getVendorRequirements();
+              for (int i = 0; i < 2; i++) {
+                Navigator.pop(context);
+              }
+            }
           },
         ),
       ),
@@ -144,6 +215,13 @@ class TransmissionSelector extends StatefulWidget {
 
 class _TransmissionSelectorState extends State<TransmissionSelector> {
   bool isAutomatic = true;
+  late final RequirementProvider provider;
+  @override
+  void initState() {
+    provider = context.read<RequirementProvider>();
+    // TODO: implement initState
+    super.initState();
+  }
 
   @override
   Widget build(BuildContext context) {
@@ -180,6 +258,7 @@ class _TransmissionSelectorState extends State<TransmissionSelector> {
                 onTap: () {
                   setState(() {
                     isAutomatic = true;
+                    provider.addRequirementModel.transmissionId = 1;
                   });
                 },
                 child: Container(
@@ -199,7 +278,7 @@ class _TransmissionSelectorState extends State<TransmissionSelector> {
                     style: TextStyle(
                       color: isAutomatic
                           ? const Color(0xff4A101D)
-                          : const Color.fromARGB(255, 233, 233, 233),
+                          : const Color.fromARGB(255, 178, 178, 178),
                     ),
                   ),
                 ),
@@ -209,6 +288,7 @@ class _TransmissionSelectorState extends State<TransmissionSelector> {
                 onTap: () {
                   setState(() {
                     isAutomatic = false;
+                    provider.addRequirementModel.transmissionId = 2;
                   });
                 },
                 child: Container(
@@ -228,7 +308,7 @@ class _TransmissionSelectorState extends State<TransmissionSelector> {
                     style: TextStyle(
                       color: !isAutomatic
                           ? const Color(0xff4A101D)
-                          : const Color.fromARGB(255, 233, 233, 233),
+                          : const Color.fromARGB(255, 178, 178, 178),
                     ),
                   ),
                 ),
@@ -240,3 +320,5 @@ class _TransmissionSelectorState extends State<TransmissionSelector> {
     );
   }
 }
+
+List<String> years = ['2020', '2021', '2022', '2023', '2024'];
